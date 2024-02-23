@@ -1,5 +1,5 @@
 import express, { Application, Request, Response } from "express";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 import "dotenv/config";
 import cors from "cors";
 
@@ -29,6 +29,17 @@ async function run() {
 
     app.get("/tasks", async (req: Request, res: Response) => {
       const result = await todo_app.find().toArray();
+      res.send(result);
+    });
+    app.post("/tasks", async (req: Request, res: Response) => {
+      const data = req.body;
+      const result = await todo_app.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/tasks/:id", async (req: Request, res: Response) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await todo_app.deleteOne(query);
       res.send(result);
     });
 

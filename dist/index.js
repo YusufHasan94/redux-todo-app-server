@@ -38,7 +38,17 @@ function run() {
             const todo_app = client.db("redux-todo-app").collection("todo-app");
             app.get("/tasks", (req, res) => __awaiter(this, void 0, void 0, function* () {
                 const result = yield todo_app.find().toArray();
-                console.log(result);
+                res.send(result);
+            }));
+            app.post("/tasks", (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const data = req.body;
+                const result = yield todo_app.insertOne(data);
+                res.send(result);
+            }));
+            app.delete("/tasks/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const id = req.params.id;
+                const query = { _id: new mongodb_1.ObjectId(id) };
+                const result = yield todo_app.deleteOne(query);
                 res.send(result);
             }));
             yield client.db("admin").command({ ping: 1 });
