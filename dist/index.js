@@ -37,7 +37,11 @@ function run() {
             // Send a ping to confirm a successful connection
             const todo_app = client.db("redux-todo-app").collection("todo-app");
             app.get("/tasks", (req, res) => __awaiter(this, void 0, void 0, function* () {
-                const result = yield todo_app.find().toArray();
+                let query = {};
+                if (req.query.priority) {
+                    query.priority = req.query.priority;
+                }
+                const result = yield todo_app.find(query).toArray();
                 res.send(result);
             }));
             app.post("/tasks", (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -49,6 +53,22 @@ function run() {
                 const id = req.params.id;
                 const query = { _id: new mongodb_1.ObjectId(id) };
                 const result = yield todo_app.deleteOne(query);
+                res.send(result);
+            }));
+            app.put("/tasks/:id", (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const id = req.params.id;
+                const data = req.body;
+                const filter = { _id: new mongodb_1.ObjectId(id) };
+                const updateDoc = {
+                    $set: {
+                        isCompleted: data.isCompleted,
+                        title: data.title,
+                        description: data.description,
+                        priority: data.priority,
+                    },
+                };
+                const options = { upsert: true };
+                const result = yield todo_app.updateOne(filter, updateDoc, options);
                 res.send(result);
             }));
             yield client.db("admin").command({ ping: 1 });

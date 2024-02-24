@@ -28,7 +28,11 @@ async function run() {
     const todo_app = client.db("redux-todo-app").collection("todo-app");
 
     app.get("/tasks", async (req: Request, res: Response) => {
-      const result = await todo_app.find().toArray();
+      let query: any = {};
+      if (req.query.priority) {
+        query.priority = req.query.priority;
+      }
+      const result = await todo_app.find(query).toArray();
       res.send(result);
     });
     app.post("/tasks", async (req: Request, res: Response) => {
@@ -40,6 +44,22 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await todo_app.deleteOne(query);
+      res.send(result);
+    });
+    app.put("/tasks/:id", async (req: Request, res: Response) => {
+      const id = req.params.id;
+      const data = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          isCompleted: data.isCompleted,
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+        },
+      };
+      const options = { upsert: true };
+      const result = await todo_app.updateOne(filter, updateDoc, options);
       res.send(result);
     });
 
